@@ -112,6 +112,7 @@ class SEResNet(nn.Module):
     @classmethod # cls sta a indicare la classe stessa, in questo caso la SE_RESNET
     def build_classifier(cls, arch: str, num_classes: int, input_channels: int):
         _, type=arch.split("se_rn")[1]
+        cls_instance=None
         if type=='18':
             cls_instance = ResNet(SEBasicBlock, [2, 2, 2, 2], num_classes=num_classes)
         if type=='34':
