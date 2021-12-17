@@ -112,16 +112,19 @@ class SEResNet(nn.Module):
     @classmethod # cls sta a indicare la classe stessa, in questo caso la SE_RESNET
     def build_classifier(cls, arch: str, num_classes: int, input_channels: int):
         _, type=arch.split("se_rn")[1]
-        cls_instance=None
         if type=='18':
             cls_instance = ResNet(SEBasicBlock, [2, 2, 2, 2], num_classes=num_classes)
+            cls_instance.avg_pool = nn.AdaptiveAvgPool2d(1)
         if type=='34':
             cls_instance = ResNet(SEBasicBlock, [3, 4, 6, 3], num_classes=num_classes)
+            cls_instance.avg_pool = nn.AdaptiveAvgPool2d(1)
         if type=='50':
             cls_instance = ResNet(SEBottleneck, [3, 4, 6, 3], num_classes=num_classes)
+            cls_instance.avg_pool = nn.AdaptiveAvgPool2d(1)
         if type=='101':
             cls_instance = ResNet(SEBottleneck, [3, 4, 23, 3], num_classes=num_classes)
+            cls_instance.avg_pool = nn.AdaptiveAvgPool2d(1)
         if type=='152':
             cls_instance = ResNet(SEBottleneck, [3, 8, 36, 3], num_classes=num_classes)
-        cls_instance.avg_pool = nn.AdaptiveAvgPool2d(1)
+            cls_instance.avg_pool = nn.AdaptiveAvgPool2d(1)
         return cls_instance
