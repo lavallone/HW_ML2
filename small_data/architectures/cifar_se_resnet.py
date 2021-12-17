@@ -225,18 +225,9 @@ class SEBottleneck(nn.Module):
 
 class SE_RESNET(nn.Module):
 
-    def __init__(self):
-        super(ResNet, self).__init__()
-
     @staticmethod
     def get_classifiers():
         return ['resnet18', 'resnet34', 'resnet50', 'resnet101']
-    @classmethod
-    def build_classifier(cls, arch: str, num_classes: int, input_channels: int):
-        return None
-    
-    def forward(self, x):
-        return None
     
 
 def se_resnet18(pretrained=False, progress=True, **kwargs):
