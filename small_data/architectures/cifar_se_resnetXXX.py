@@ -103,7 +103,7 @@ class SEBottleneck(nn.Module):
 
 class SEResNet(nn.Module):
     def __init__(self):
-            super(SEResNet, self).__init__()
+        super(SEResNet, self).__init__()
 
     @staticmethod
     def get_classifiers():
@@ -115,16 +115,16 @@ class SEResNet(nn.Module):
         if type=='18':
             cls_instance = ResNet(SEBasicBlock, [2, 2, 2, 2], num_classes=num_classes)
             cls_instance.avg_pool = nn.AdaptiveAvgPool2d(1)
-        if type=='34':
+        elif type=='34':
             cls_instance = ResNet(SEBasicBlock, [3, 4, 6, 3], num_classes=num_classes)
             cls_instance.avg_pool = nn.AdaptiveAvgPool2d(1)
-        if type=='50':
+        elif type=='50':
             cls_instance = ResNet(SEBottleneck, [3, 4, 6, 3], num_classes=num_classes)
             #cls_instance.avg_pool = nn.AdaptiveAvgPool2d(1)
-        if type=='101':
+        elif type=='101':
             cls_instance = ResNet(SEBottleneck, [3, 4, 23, 3], num_classes=num_classes)
             cls_instance.avg_pool = nn.AdaptiveAvgPool2d(1)
-        if type=='152':
+        elif type=='152':
             cls_instance = ResNet(SEBottleneck, [3, 8, 36, 3], num_classes=num_classes)
             cls_instance.avg_pool = nn.AdaptiveAvgPool2d(1)
         return cls_instance
