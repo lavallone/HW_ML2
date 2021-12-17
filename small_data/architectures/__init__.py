@@ -1,1 +1,1 @@
-from . import cifar_resnet, wrn
+from . import cifar_resnet, wrn, cifar_se_resnet
