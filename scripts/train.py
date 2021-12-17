@@ -6,7 +6,7 @@ import json
 import torch
 from collections import OrderedDict
 
-from small_data import available_datasets, get_dataset, available_pipelines, get_pipeline, get_pipeline_hparams
+from small_data import available_datasets, get_dataset, available_pipelines, get_pipeline, get_pipeline_hparams, available_classifiers
 
 
 class NegateAction(argparse.Action):
@@ -85,6 +85,10 @@ def save_history_json(fn, metrics, args, hparams):
 
 
 if __name__ == '__main__':
+
+    # List of available architectures
+    avail_arch = available_classifiers()
+    print(avail_arch)
 
     # Parse Arguments
     parser = argparse.ArgumentParser(

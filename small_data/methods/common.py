@@ -719,5 +719,3 @@ class BasicAugmentation(LearningMethod):
             'hflip' : True,
             'vflip' : False
         }
-
-    
