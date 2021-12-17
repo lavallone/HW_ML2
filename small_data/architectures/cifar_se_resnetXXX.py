@@ -128,3 +128,4 @@ class SEResNet(nn.Module):
             cls_instance = ResNet(SEBottleneck, [3, 8, 36, 3], num_classes=num_classes)
             cls_instance.avg_pool = nn.AdaptiveAvgPool2d(1)
         return cls_instance
+        

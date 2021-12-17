@@ -13,6 +13,8 @@ from ..classifiers import build_classifier
 from ..utils import is_notebook
 from ..evaluation import predict_class_scores, balanced_accuracy_from_predictions
 
+from torchsummary import summary
+
 if is_notebook():
     from tqdm.notebook import tqdm, trange
 else:
@@ -358,6 +360,8 @@ class LearningMethod(ABC):
         # Create model
         model = self.create_model(architecture, train_data.num_classes, train_data.num_input_channels).cuda()
         
+        summary(model)
+
         if init_weights is not None:
             model = self.load_weights(model, init_weights)
         
