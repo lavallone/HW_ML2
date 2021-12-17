@@ -84,20 +84,6 @@ class ResNet(nn.Module):
     def get_classifiers():
         return ['rn20', 'rn32', 'rn44', 'rn56', 'rn110', 'rn1202']
     
-    @classmethod
-    def build_classifier(cls, arch: str, num_classes: int, input_channels: int):
-        _, depth = arch.split('rn')
-        
-        CIFAR_RESNET_CONFIG = {20    : { 'block' : BasicBlock, 'layers' : [3, 3, 3] },
-                               32    : { 'block' : BasicBlock, 'layers' : [5, 5, 5] },
-                               44    : { 'block' : BasicBlock, 'layers' : [7, 7, 7] },
-                               56    : { 'block' : BasicBlock, 'layers' : [9, 9, 9] },
-                               101   : { 'block' : BasicBlock, 'layers' : [18, 18, 18] },
-                               1202  : { 'block' : BasicBlock, 'layers' : [200, 200, 200] },
-                               }
-                
-        cls_instance = cls(**CIFAR_RESNET_CONFIG[int(depth)], num_classes=num_classes, input_channels=input_channels)
-        return cls_instance
     
     def forward(self, x):
 
