@@ -120,7 +120,7 @@ class SEResNet(nn.Module):
             cls_instance.avg_pool = nn.AdaptiveAvgPool2d(1)
         if type=='50':
             cls_instance = ResNet(SEBottleneck, [3, 4, 6, 3], num_classes=num_classes)
-            cls_instance.avg_pool = nn.AdaptiveAvgPool2d(1)
+            #cls_instance.avg_pool = nn.AdaptiveAvgPool2d(1)
         if type=='101':
             cls_instance = ResNet(SEBottleneck, [3, 4, 23, 3], num_classes=num_classes)
             cls_instance.avg_pool = nn.AdaptiveAvgPool2d(1)
