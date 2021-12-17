@@ -1,243 +1,134 @@
 import torch.nn as nn
-import torch.nn.functional as F
-import torch.nn.init as init
-from torchvision.models.resnet import BasicBlock
 
 ########################################################################
-## helper functions ##
-def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
-    """3x3 convolution with padding"""
-    return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
-                     padding=dilation, groups=groups, bias=False, dilation=dilation)
+## helper function ##
+def conv3x3(in_planes, out_planes, stride=1):
+    return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride, padding=1, bias=False)
 
-
-def conv1x1(in_planes, out_planes, stride=1):
-    """1x1 convolution"""
-    return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)
-
-
-def _resnet(arch, block, layers, pretrained, progress, **kwargs):
-    model = ResNet(block, layers, **kwargs)
-    return model
-########################################################################
-
-class SE_Block(nn.Module):
-    "credits: https://github.com/moskomule/senet.pytorch/blob/master/senet/se_module.py#L4"
-    def __init__(self, c, r=16):
-        super().__init__()
-        self.squeeze = nn.AdaptiveAvgPool2d(1)
-        self.excitation = nn.Sequential(
-            nn.Linear(c, c // r, bias=False),
+class SELayer(nn.Module):
+    def __init__(self, channel, reduction=16):
+        super(SELayer, self).__init__()
+        self.avg_pool = nn.AdaptiveAvgPool2d(1)
+        self.fc = nn.Sequential(
+            nn.Linear(channel, channel // reduction, bias=False),
             nn.ReLU(inplace=True),
-            nn.Linear(c // r, c, bias=False),
+            nn.Linear(channel // reduction, channel, bias=False),
             nn.Sigmoid()
         )
 
     def forward(self, x):
-        bs, c, _, _ = x.shape
-        y = self.squeeze(x).view(bs, c)
-        y = self.excitation(y).view(bs, c, 1, 1)
+        b, c, _, _ = x.size()
+        y = self.avg_pool(x).view(b, c)
+        y = self.fc(y).view(b, c, 1, 1)
         return x * y.expand_as(x)
-
-class BasicBlock(nn.Module):
-    expansion = 1
-
-    def __init__(self, inplanes, planes, stride=1, downsample=None, groups=1,
-                 base_width=64, dilation=1, norm_layer=None):
-        super(BasicBlock, self).__init__()
-        if norm_layer is None:
-            norm_layer = nn.BatchNorm2d
-        if groups != 1 or base_width != 64:
-            raise ValueError('BasicBlock only supports groups=1 and base_width=64')
-        if dilation > 1:
-            raise NotImplementedError("Dilation > 1 not supported in BasicBlock")
-        # Both self.conv1 and self.downsample layers downsample the input when stride != 1
-        self.conv1 = conv3x3(inplanes, planes, stride)
-        self.bn1 = norm_layer(planes)
-        self.relu = nn.ReLU(inplace=True)
-        self.conv2 = conv3x3(planes, planes)
-        self.bn2 = norm_layer(planes)
-        self.downsample = downsample
-        self.stride = stride
-
-    def forward(self, x):
-        identity = x
-
-        out = self.conv1(x)
-        out = self.bn1(out)
-        out = self.relu(out)
-
-        out = self.conv2(out)
-        out = self.bn2(out)
-
-        if self.downsample is not None:
-            identity = self.downsample(x)
-
-        out += identity
-        out = self.relu(out)
-
-        return out
+########################################################################
 
 class SEBasicBlock(nn.Module):
-    expansion = 1
-
-    def __init__(self, inplanes, planes, stride=1, downsample=None, groups=1,
-                 base_width=64, dilation=1, norm_layer=None, r=16):
+    def __init__(self, inplanes, planes, stride=1, reduction=16):
         super(SEBasicBlock, self).__init__()
-        if norm_layer is None:
-            norm_layer = nn.BatchNorm2d
-        if groups != 1 or base_width != 64:
-            raise ValueError('BasicBlock only supports groups=1 and base_width=64')
-        if dilation > 1:
-            raise NotImplementedError("Dilation > 1 not supported in BasicBlock")
-        # Both self.conv1 and self.downsample layers downsample the input when stride != 1
         self.conv1 = conv3x3(inplanes, planes, stride)
-        self.bn1 = norm_layer(planes)
+        self.bn1 = nn.BatchNorm2d(planes)
         self.relu = nn.ReLU(inplace=True)
         self.conv2 = conv3x3(planes, planes)
-        self.bn2 = norm_layer(planes)
-        self.downsample = downsample
+        self.bn2 = nn.BatchNorm2d(planes)
+        self.se = SELayer(planes, reduction)
+        if inplanes != planes:
+            self.downsample = nn.Sequential(nn.Conv2d(inplanes, planes, kernel_size=1, stride=stride, bias=False), nn.BatchNorm2d(planes))
+        else:
+            self.downsample = lambda x: x
         self.stride = stride
-        # add SE block
-        self.se = SE_Block(planes, r)
 
     def forward(self, x):
-        identity = x
-
+        residual = self.downsample(x)
         out = self.conv1(x)
         out = self.bn1(out)
         out = self.relu(out)
 
         out = self.conv2(out)
         out = self.bn2(out)
-        # add SE operation
         out = self.se(out)
 
-        if self.downsample is not None:
-            identity = self.downsample(x)
-
-        out += identity
+        out += residual
         out = self.relu(out)
 
         return out
 
-class Bottleneck(nn.Module):
-    # Bottleneck in torchvision places the stride for downsampling at 3x3 convolution(self.conv2)
-    # while original implementation places the stride at the first 1x1 convolution(self.conv1)
-    # according to "Deep residual learning for image recognition"https://arxiv.org/abs/1512.03385.
-    # This variant is also known as ResNet V1.5 and improves accuracy according to
-    # https://ngc.nvidia.com/catalog/model-scripts/nvidia:resnet_50_v1_5_for_pytorch.
-
-    expansion = 4
-
-    def __init__(self, inplanes, planes, stride=1, downsample=None, groups=1,
-                 base_width=64, dilation=1, norm_layer=None):
-        super(Bottleneck, self).__init__()
-        if norm_layer is None:
-            norm_layer = nn.BatchNorm2d
-        width = int(planes * (base_width / 64.)) * groups
-        # Both self.conv2 and self.downsample layers downsample the input when stride != 1
-        self.conv1 = conv1x1(inplanes, width)
-        self.bn1 = norm_layer(width)
-        self.conv2 = conv3x3(width, width, stride, groups, dilation)
-        self.bn2 = norm_layer(width)
-        self.conv3 = conv1x1(width, planes * self.expansion)
-        self.bn3 = norm_layer(planes * self.expansion)
+class SEResNet(nn.Module):
+    def __init__(self, block, n_size, num_classes=10, reduction=16):
+        super(SEResNet, self).__init__()
+        self.inplane = 16
+        self.conv1 = nn.Conv2d(3, self.inplane, kernel_size=3, stride=1, padding=1, bias=False)
+        self.bn1 = nn.BatchNorm2d(self.inplane)
         self.relu = nn.ReLU(inplace=True)
-        self.downsample = downsample
-        self.stride = stride
+        self.layer1 = self._make_layer(block, 16, blocks=n_size, stride=1, reduction=reduction)
+        self.layer2 = self._make_layer(block, 32, blocks=n_size, stride=2, reduction=reduction)
+        self.layer3 = self._make_layer(block, 64, blocks=n_size, stride=2, reduction=reduction)
+        self.avgpool = nn.AdaptiveAvgPool2d(1)
+        self.fc = nn.Linear(64, num_classes)
+        self.initialize()
 
-    def forward(self, x):
-        identity = x
+    def initialize(self):
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                nn.init.kaiming_normal_(m.weight)
+            elif isinstance(m, nn.BatchNorm2d):
+                nn.init.constant_(m.weight, 1)
+                nn.init.constant_(m.bias, 0)
 
-        out = self.conv1(x)
-        out = self.bn1(out)
-        out = self.relu(out)
+    def _make_layer(self, block, planes, blocks, stride, reduction):
+        strides = [stride] + [1] * (blocks - 1)
+        layers = []
+        for stride in strides:
+            layers.append(block(self.inplane, planes, stride, reduction))
+            self.inplane = planes
 
-        out = self.conv2(out)
-        out = self.bn2(out)
-        out = self.relu(out)
-
-        out = self.conv3(out)
-        out = self.bn3(out)
-
-        if self.downsample is not None:
-            identity = self.downsample(x)
-
-        out += identity
-        out = self.relu(out)
-
-        return out
-
-class SEBottleneck(nn.Module):
-    # Bottleneck in torchvision places the stride for downsampling at 3x3 convolution(self.conv2)
-    # while original implementation places the stride at the first 1x1 convolution(self.conv1)
-    # according to "Deep residual learning for image recognition"https://arxiv.org/abs/1512.03385.
-    # This variant is also known as ResNet V1.5 and improves accuracy according to
-    # https://ngc.nvidia.com/catalog/model-scripts/nvidia:resnet_50_v1_5_for_pytorch.
-
-    expansion = 4
-
-    def __init__(self, inplanes, planes, stride=1, downsample=None, groups=1,
-                 base_width=64, dilation=1, norm_layer=None, r=16):
-        super(SEBottleneck, self).__init__()
-        if norm_layer is None:
-            norm_layer = nn.BatchNorm2d
-        width = int(planes * (base_width / 64.)) * groups
-        # Both self.conv2 and self.downsample layers downsample the input when stride != 1
-        self.conv1 = conv1x1(inplanes, width)
-        self.bn1 = norm_layer(width)
-        self.conv2 = conv3x3(width, width, stride, groups, dilation)
-        self.bn2 = norm_layer(width)
-        self.conv3 = conv1x1(width, planes * self.expansion)
-        self.bn3 = norm_layer(planes * self.expansion)
-        self.relu = nn.ReLU(inplace=True)
-        self.downsample = downsample
-        self.stride = stride
-        # Add SE block
-        self.se = SE_Block(planes, r)
-
-    def forward(self, x):
-        identity = x
-
-        out = self.conv1(x)
-        out = self.bn1(out)
-        out = self.relu(out)
-
-        out = self.conv2(out)
-        out = self.bn2(out)
-        out = self.relu(out)
-
-        out = self.conv3(out)
-        out = self.bn3(out)
-        # Add SE operation
-        out = self.se(out)
-
-        if self.downsample is not None:
-            identity = self.downsample(x)
-
-        out += identity
-        out = self.relu(out)
-
-        return out
-
-################################################################################################
-
-class SE_RESNET(nn.Module):
+        return nn.Sequential(*layers)
 
     @staticmethod
     def get_classifiers():
-        return ['resnet18', 'resnet34', 'resnet50', 'resnet101']
-    
+        return ['se_rn20', 'se_rn32', 'se_rn56']
+        
+    @classmethod # cls sta a indicare la classe stessa, in questo caso la SE_RESNET
+    def build_classifier(cls, arch: str, num_classes: int, input_channels: int):
+        _, type=arch.split("se_rn")[1]
+        n_size=0
+        if type=='20':
+            n_size=3
+        if type=='32':
+            n_size=5
+        if type=='56':
+            n_size=9
+        cls_instance = cls(SEBasicBlock, n_size, num_classes)
+        return cls_instance
 
-def se_resnet18(pretrained=False, progress=True, **kwargs):
-    return _resnet('resnet18', SEBasicBlock, [2, 2, 2, 2], pretrained, progress, **kwargs)
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.relu(x)
 
-def se_resnet34(pretrained=False, progress=True, **kwargs):
-    return _resnet('resnet34', SEBasicBlock, [3, 4, 6, 3], pretrained, progress, **kwargs)
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
 
-def se_resnet50(pretrained=False, progress=True, **kwargs):
-    return _resnet('resnet50', SEBottleneck, [3, 4, 6, 3], pretrained, progress, **kwargs)
+        x = self.avgpool(x)
+        x = x.view(x.size(0), -1)
+        x = self.fc(x)
 
-def se_resnet101(pretrained=False, progress=True, **kwargs):
-    return _resnet('resnet101', SEBottleneck, [3, 4, 23, 3], pretrained, progress, **kwargs)
+        return x
+
+################################################################################################
+
+## capire che tipo di architetture sono
+# def se_resnet20(**kwargs):
+#     model = SEResNet(SEBasicBlock, 3, **kwargs)
+#     return model
+
+
+# def se_resnet32(**kwargs):
+#     model = SEResNet(SEBasicBlock, 5, **kwargs)
+#     return model
+
+
+# def se_resnet56(**kwargs):
+#     model = SEResNet(SEBasicBlock, 9, **kwargs)
+#     return model

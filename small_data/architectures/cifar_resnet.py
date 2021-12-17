@@ -4,6 +4,7 @@ import torch.nn.init as init
 from torchvision.models.resnet import BasicBlock
 
 
+# kaiming initialization of weights --> I don't know if using it also with SE_RESNET
 def _weights_init(m):
     if isinstance(m, nn.Linear) or isinstance(m, nn.Conv2d):
         init.kaiming_normal_(m.weight)
