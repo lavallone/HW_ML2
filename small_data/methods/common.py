@@ -360,7 +360,7 @@ class LearningMethod(ABC):
         # Create model
         model = self.create_model(architecture, train_data.num_classes, train_data.num_input_channels).cuda()
         
-        summary(model)
+        summary(model, (3,32,32))
 
         if init_weights is not None:
             model = self.load_weights(model, init_weights)
