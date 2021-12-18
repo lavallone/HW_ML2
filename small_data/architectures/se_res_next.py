@@ -256,11 +256,11 @@ class SEResNeXt(nn.Module):
     def build_classifier(cls, arch: str, num_classes: int, input_channels: int):
         _, type = arch.split("se_resnext")
         if type=='50':
-            cls_instance=cls(block=Bottleneck, layers=[3, 4, 6, 3], num_classes=num_classes)
+            cls_instance=cls(block=BottleneckX, layers=[3, 4, 6, 3], num_classes=num_classes)
         if type=='101':
-            cls_instance=cls(block=Bottleneck, layers=[3, 4, 23, 3], num_classes=num_classes)
+            cls_instance=cls(block=BottleneckX, layers=[3, 4, 23, 3], num_classes=num_classes)
         if type=='152':
-            cls_instance=cls(block=Bottleneck, layers=[3, 8, 36, 3], num_classes=num_classes)
+            cls_instance=cls(block=BottleneckX, layers=[3, 8, 36, 3], num_classes=num_classes)
         return cls_instance
 
 
