@@ -87,8 +87,8 @@ def save_history_json(fn, metrics, args, hparams):
 if __name__ == '__main__':
 
     # List of available architectures
-    #avail_arch = available_classifiers()
-    #print(avail_arch)
+    avail_arch = available_classifiers()
+    print(avail_arch)
 
     # Parse Arguments
     parser = argparse.ArgumentParser(
