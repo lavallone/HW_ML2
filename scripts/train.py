@@ -184,6 +184,8 @@ if __name__ == '__main__':
         data_kwargs['img_dir'] = args.img_dir
     train_data = get_dataset(args.dataset, args.data_root, args.train_split, **data_kwargs)
     test_data = get_dataset(args.dataset, args.data_root, args.test_split, **data_kwargs)
+    print(train_data)
+    print(test_data)
 
     # Instantiate training pipeline
     pipeline = get_pipeline(args.method, **hparams)
