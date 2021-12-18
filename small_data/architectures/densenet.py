@@ -192,14 +192,14 @@ class DenseNet(nn.Module):
     
     @classmethod
     def build_classifier(cls, arch: str, num_classes: int, input_channels: int):
-        _, type = int(arch.split('densenet')[1])
-        if type==121:
+        _, type = arch.split('densenet')[1]
+        if type=='121':
             cls_instance=cls(32, (6, 12, 24, 16), 64, num_classes=num_classes)
-        if type==161:
+        if type=='161':
             cls_instance=cls(48, (6, 12, 36, 24), 96, num_classes=num_classes)
-        if type==169:
+        if type=='169':
             cls_instance=cls(32, (6, 12, 32, 32), 64, num_classes=num_classes)
-        if type==201:
+        if type=='201':
             cls_instance=cls(32, (6, 12, 48, 32), 64, num_classes=num_classes)
         return cls_instance
 
