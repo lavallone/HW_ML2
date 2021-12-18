@@ -134,7 +134,7 @@ class DenseNet(nn.Module):
         num_init_features: int = 64,
         bn_size: int = 4,
         drop_rate: float = 0,
-        num_classes: int = 1000,
+        num_classes: int,
         memory_efficient: bool = False,
     ) -> None:
 
@@ -194,13 +194,13 @@ class DenseNet(nn.Module):
     def build_classifier(cls, arch: str, num_classes: int, input_channels: int):
         _, type = arch.split("densenet")
         if type=='121':
-            cls_instance=cls(32, (6, 12, 24, 16), 64, num_classes=num_classes)
+            cls_instance=cls(growth_rate=32, block_config=(6, 12, 24, 16), num_init_features=64, num_classes=num_classes)
         if type=='161':
-            cls_instance=cls(48, (6, 12, 36, 24), 96, num_classes=num_classes)
+            cls_instance=cls(growth_rate=48, block_config=(6, 12, 36, 24), num_init_features=96, num_classes=num_classes)
         if type=='169':
-            cls_instance=cls(32, (6, 12, 32, 32), 64, num_classes=num_classes)
+            cls_instance=cls(growth_rate=32, block_config=(6, 12, 32, 32), num_init_features=64, num_classes=num_classes)
         if type=='201':
-            cls_instance=cls(32, (6, 12, 48, 32), 64, num_classes=num_classes)
+            cls_instance=cls(growth_rate=32, block_config=(6, 12, 48, 32), num_init_features=64, num_classes=num_classes)
         return cls_instance
 
     def forward(self, x: Tensor) -> Tensor:
