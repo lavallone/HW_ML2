@@ -188,7 +188,7 @@ class DenseNet(nn.Module):
 
     @staticmethod
     def get_classifiers():
-        return ["densenet121", "densenet169", "densenet201", "densenet161"]
+        return ["densenet121", "densenet161", "densenet169", "densenet201"]
     
     @classmethod
     def build_classifier(cls, arch: str, num_classes: int, input_channels: int):
