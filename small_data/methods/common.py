@@ -498,7 +498,8 @@ class LearningMethod(ABC):
         lr_schedule : torch.optim.lr_scheduler._LRScheduler
         """
 
-        optimizer = torch.optim.SGD(model.parameters(), lr=self.hparams['lr'], momentum=0.9, weight_decay=self.hparams['weight_decay'])
+        # Default configuration for the optimizer and for the learning rate scheduler
+        optimizer = torch.optim.SGD(model.parameters(), lr=self.hparams['lr'], momentum=self.hparams['momentum'], weight_decay=self.hparams['weight_decay'], nesterov=self.hparams['nesterov'])
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max_iter)
         return optimizer, scheduler
 

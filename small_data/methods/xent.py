@@ -11,5 +11,15 @@ class CrossEntropyClassifier(BasicAugmentation):
     """
 
     def get_loss_function(self) -> Callable:
+        # here I can add the label smoothing parameter for regularization
+        return nn.CrossEntropyLoss(reduction='mean', label_smoothing=self.hparams['label_smoothing'])
 
-        return nn.CrossEntropyLoss(reduction='mean')
+    @staticmethod
+    def default_hparams() -> dict:
+
+        return {
+            **super(BasicAugmentation, BasicAugmentation).default_hparams(),
+            'momentum' : 0.9,
+            'nesterov' : True,
+            'label_smoothing' : 0.0
+        }
