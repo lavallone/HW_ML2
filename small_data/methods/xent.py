@@ -18,7 +18,7 @@ class CrossEntropyClassifier(BasicAugmentation):
     def default_hparams() -> dict:
 
         return {
-            **super(BasicAugmentation, BasicAugmentation).default_hparams(),
+            **super(CrossEntropyClassifier, CrossEntropyClassifier).default_hparams(),
             'momentum' : 0.9,
             'nesterov' : True,
             'label_smoothing' : 0.0
