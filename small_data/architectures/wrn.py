@@ -82,7 +82,7 @@ class WideResNet(nn.Module):
                 
     @staticmethod
     def get_classifiers():
-        return ['wrn-16-8', 'wrn-16-10', 'wrn-22-8', 'wrn-22-10', 'wrn-28-10', 'wrn-28-12', 'wrn-20-12']
+        return ['wrn-16-8', 'wrn-16-10', 'wrn-22-8', 'wrn-22-10', 'wrn-28-10', 'wrn-28-12', 'wrn-16-14']
     
     @classmethod
     def build_classifier(cls, arch: str, num_classes: int, input_channels: int):
