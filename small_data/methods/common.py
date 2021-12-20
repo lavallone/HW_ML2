@@ -499,12 +499,12 @@ class LearningMethod(ABC):
         """
 
         # Default configuration for the optimizer and for the learning rate scheduler
-        #optimizer = torch.optim.SGD(model.parameters(), lr=self.hparams['lr'], momentum=self.hparams['momentum'], weight_decay=self.hparams['weight_decay'])
-        #scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max_iter)
+        optimizer = torch.optim.SGD(model.parameters(), lr=self.hparams['lr'], momentum=self.hparams['momentum'], weight_decay=self.hparams['weight_decay'])
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max_iter)
 
         # alternative
-        optimizer = torch.optim.NAdam(model.parameters(), lr=self.hparams['lr'], weight_decay=self.hparams['weight_decay'])
-        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max_iter)
+        #optimizer = torch.optim.NAdam(model.parameters(), lr=self.hparams['lr'], weight_decay=self.hparams['weight_decay'])
+        #scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max_iter)
 
         # other alternative
         #optimizer = torch.optim.NAdam(model.parameters(), weight_decay=self.hparams['weight_decay'])
