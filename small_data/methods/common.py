@@ -503,7 +503,7 @@ class LearningMethod(ABC):
         #scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max_iter)
 
         # alternative
-        optimizer = torch.optim.NAdam(model.parameters(), weight_decay=self.hparams['weight_decay'])
+        optimizer = torch.optim.NAdam(model.parameters(), lr=self.hparams['lr'], weight_decay=self.hparams['weight_decay'])
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max_iter)
 
         # other alternative
