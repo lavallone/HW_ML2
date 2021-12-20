@@ -516,7 +516,8 @@ class LearningMethod(ABC):
 
         # other alternative
         optimizer = torch.optim.Adamax(model.parameters(), weight_decay=self.hparams['weight_decay'])
-        scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=25)
+        #scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=25)
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max_iter)
 
         return optimizer, scheduler
 
