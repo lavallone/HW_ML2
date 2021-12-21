@@ -82,12 +82,15 @@ class WideResNet(nn.Module):
                 
     @staticmethod
     def get_classifiers():
-        return ['wrn-16-8', 'wrn-16-10', 'wrn-22-8', 'wrn-22-10', 'wrn-28-10', 'wrn-28-12']
+        return ['wrn-16-8', 'wrn-16-10', 'wrn-22-8', 'wrn-22-8-d', 'wrn-22-10', 'wrn-28-10', 'wrn-28-12']
     
     @classmethod
     def build_classifier(cls, arch: str, num_classes: int, input_channels: int):
-        _, depth, widen_factor = arch.split('-')
-        cls_instance = cls(int(depth), num_classes, input_channels=input_channels, widen_factor=int(widen_factor))
+        _, depth, widen_factor , dropout = arch.split('-')
+        if dropout=='d':
+            cls_instance = cls(int(depth), num_classes, input_channels=input_channels, widen_factor=int(widen_factor), dropRate=0.7)
+        else:
+            cls_instance = cls(int(depth), num_classes, input_channels=input_channels, widen_factor=int(widen_factor))
         return cls_instance
         
     def forward(self, x):
