@@ -88,7 +88,7 @@ class WideResNet(nn.Module):
     def build_classifier(cls, arch: str, num_classes: int, input_channels: int):
         _, depth, widen_factor , dropout = arch.split('-')
         if dropout=='d':
-            cls_instance = cls(int(depth), num_classes, input_channels=input_channels, widen_factor=int(widen_factor), dropRate=0.7)
+            cls_instance = cls(int(depth), num_classes, input_channels=input_channels, widen_factor=int(widen_factor), dropRate=0.8)
         else:
             cls_instance = cls(int(depth), num_classes, input_channels=input_channels, widen_factor=int(widen_factor))
         return cls_instance
