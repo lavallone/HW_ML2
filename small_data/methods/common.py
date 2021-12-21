@@ -740,6 +740,6 @@ class BasicAugmentation(LearningMethod):
             'min_scale' : 1.0,
             'max_scale' : 1.0,
             'rand_shift' : 0,
-            'hflip' : True,
+            'hflip' : False,
             'vflip' : False
         }
