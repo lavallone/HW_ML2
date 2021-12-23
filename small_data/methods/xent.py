@@ -16,7 +16,7 @@ class CrossEntropyClassifier(BasicAugmentation):
 
     @staticmethod
     def default_hparams() -> dict:
-
+                
         return {
             **super(CrossEntropyClassifier, CrossEntropyClassifier).default_hparams(),
             'momentum' : 0.9,
