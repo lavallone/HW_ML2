@@ -20,6 +20,6 @@ class CrossEntropyClassifier(BasicAugmentation):
         return {
             **super(CrossEntropyClassifier, CrossEntropyClassifier).default_hparams(),
             'momentum' : 0.9,
-            'nesterov' : True,
+            'nesterov' : False,
             'label_smoothing' : 0.0
         }
