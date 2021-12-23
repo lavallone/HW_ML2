@@ -498,26 +498,27 @@ class LearningMethod(ABC):
         lr_schedule : torch.optim.lr_scheduler._LRScheduler
         """
 
-        # Default configuration for the optimizer and for the learning rate scheduler
+        # default configuration for the optimizer and for the learning rate scheduler
         #optimizer = torch.optim.SGD(model.parameters(), lr=self.hparams['lr'], weight_decay=self.hparams['weight_decay'])
         #scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max_iter)
 
+        # other configuration
         optimizer = torch.optim.SGD(model.parameters(), lr=self.hparams['lr'], momentum=self.hparams['momentum'], weight_decay=self.hparams['weight_decay'], nesterov=self.hparams['nesterov'])
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max_iter)
 
-        # alternative
+        # other configuration
         #optimizer = torch.optim.NAdam(model.parameters(), lr=self.hparams['lr'], weight_decay=self.hparams['weight_decay'])
         #scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max_iter)
 
-        # other alternative
+        # other configuration
         #optimizer = torch.optim.NAdam(model.parameters(), weight_decay=self.hparams['weight_decay'])
         #scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
 
-        # other alternative
+        # other configuration
         #optimizer = torch.optim.RMSprop(model.parameters(), lr=self.hparams['lr'], momentum=self.hparams['momentum'], weight_decay=self.hparams['weight_decay'])
         #scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max_iter)
 
-        # other alternative
+        # other configuration
         #optimizer = torch.optim.Adamax(model.parameters(), weight_decay=self.hparams['weight_decay'])
         #scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=25)
         #scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max_iter)
